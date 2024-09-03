@@ -181,7 +181,11 @@
             }
 
             function handleGuess() {
-               if (guess.toUpperCase() === currentMovie.title.replace(/\s/g, '').toUpperCase()) {
+               const normalizeString = (str) => str.toUpperCase().replace(/[^A-Z0-9]/g, '');
+    const guessNormalized = normalizeString(guess);
+    const titleNormalized = normalizeString(currentMovie.title);
+
+    if (guessNormalized === titleNormalized) {
         const pointsEarned = [10, 8, 6, 4][hintsUsed];
         const newScore = score + pointsEarned;
         setScore(newScore);
