@@ -4,152 +4,61 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cine Scramble</title>
-    <script src="https://unpkg.com/react@17/umd/react.production.min.js"></script>
-    <script src="https://unpkg.com/react-dom@17/umd/react-dom.production.min.js"></script>
-    <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; }
+        button { padding: 10px; margin: 5px; }
+        input { padding: 10px; width: 100%; box-sizing: border-box; margin-bottom: 10px; }
+    </style>
 </head>
 <body>
-    <div id="root"></div>
-    <script type="text/babel">
+    <h1>Cine Scramble</h1>
+    <div id="game">
+        <p id="plot"></p>
+        <input type="text" id="guess" placeholder="Enter your guess">
+        <button onclick="checkGuess()">Guess</button>
+        <button onclick="getHint()">Hint</button>
+        <p id="message"></p>
+    </div>
+
+    <script>
         const movies = [
             { title: "JAWS", plot: "A giant man-eating shark terrorizes a beach town." },
             { title: "ALIEN", plot: "A deadly creature stalks the crew of a spaceship." },
             { title: "ROCKY", plot: "An underdog boxer gets a shot at the heavyweight title." },
-            { title: "INCEPTION", plot: "A thief enters people's dreams to plant ideas." },
-            { title: "TITANIC", plot: "A love story unfolds during a doomed maiden voyage." },
         ];
 
-        function CineScramble() {
-            const [currentMovieIndex, setCurrentMovieIndex] = React.useState(0);
-            const [guess, setGuess] = React.useState('');
-            const [message, setMessage] = React.useState('');
-            const [score, setScore] = React.useState(0);
-            const [grid, setGrid] = React.useState([]);
-            const [hintsUsed, setHintsUsed] = React.useState(0);
-            const [showHow, setShowHow] = React.useState(false);
+        let currentMovie;
+        let hintsUsed = 0;
 
-            React.useEffect(() => {
-                setGrid(createGrid(movies[currentMovieIndex].title));
-            }, [currentMovieIndex]);
-
-            function createGrid(title) {
-                const cleanTitle = title.replace(/\s/g, '');
-                const side = Math.ceil(Math.sqrt(cleanTitle.length));
-                let flatGrid = cleanTitle.padEnd(side * side, ' ').split('').map(char => char.toLowerCase());
-                return Array(side).fill().map(() => flatGrid.splice(0, side));
-            }
-
-            function handleGuess() {
-                if (guess.toUpperCase() === movies[currentMovieIndex].title.replace(/\s/g, '')) {
-                    const pointsEarned = [10, 8, 6, 4][hintsUsed];
-                    setScore(score + pointsEarned);
-                    setMessage(`Correct! You earned ${pointsEarned} points. Your total score is ${score + pointsEarned}.`);
-                    if (currentMovieIndex < movies.length - 1) {
-                        setCurrentMovieIndex(currentMovieIndex + 1);
-                        setHintsUsed(0);
-                        setGuess('');
-                    } else {
-                        setMessage(`Congratulations! You've completed all movies. Your final score is ${score + pointsEarned}.`);
-                    }
-                } else {
-                    setMessage('Sorry, that\'s not correct. Try again!');
-                }
-            }
-
-            function revealHint() {
-                if (hintsUsed >= 3) return;
-
-                let newGrid = [...grid];
-                let hiddenIndices = [];
-
-                newGrid.forEach((row, i) => {
-                    row.forEach((cell, j) => {
-                        if (cell !== ' ' && cell === cell.toLowerCase()) {
-                            hiddenIndices.push([i, j]);
-                        }
-                    });
-                });
-
-                if (hiddenIndices.length > 0) {
-                    const [i, j] = hiddenIndices[Math.floor(Math.random() * hiddenIndices.length)];
-                    newGrid[i][j] = newGrid[i][j].toUpperCase();
-                    setGrid(newGrid);
-                    setHintsUsed(hintsUsed + 1);
-                }
-            }
-
-            return (
-                <div className="p-4 max-w-md mx-auto">
-                    <h1 className="text-2xl font-bold mb-4">Cine Scramble</h1>
-                    <button 
-                        onClick={() => setShowHow(!showHow)}
-                        className="bg-gray-300 px-4 py-2 mb-4"
-                    >
-                        {showHow ? "Back to Game" : "How to Play"}
-                    </button>
-                    {showHow ? (
-                        <div className="mb-4">
-                            <h2 className="text-xl font-bold mb-2">How to Play</h2>
-                            <ul className="list-disc pl-5">
-                                <li>Guess the movie title based on the plot and visible letters.</li>
-                                <li>You have 3 hints available. Each hint reveals a random letter.</li>
-                                <li>Scoring:
-                                    <ul className="list-circle pl-5">
-                                        <li>Correct guess without hints: 10 points</li>
-                                        <li>With 1 hint: 8 points</li>
-                                        <li>With 2 hints: 6 points</li>
-                                        <li>With 3 hints: 4 points</li>
-                                    </ul>
-                                </li>
-                                <li>Try to get the highest score possible!</li>
-                            </ul>
-                        </div>
-                    ) : (
-                        <>
-                            <p className="mb-4"><strong>Score:</strong> {score}</p>
-                            <div className="grid grid-cols-4 gap-2 mb-4">
-                                {grid.map((row, i) => 
-                                    row.map((cell, j) => (
-                                        <div key={`${i}-${j}`} className="w-12 h-12 border flex items-center justify-center font-bold">
-                                            {cell === cell.toUpperCase() ? cell : ''}
-                                        </div>
-                                    ))
-                                )}
-                            </div>
-                            <p className="mb-4"><strong>Plot:</strong> {movies[currentMovieIndex].plot}</p>
-                            <input
-                                type="text"
-                                value={guess}
-                                onChange={(e) => setGuess(e.target.value)}
-                                placeholder="Enter your guess"
-                                className="border p-2 mb-2 w-full"
-                            />
-                            <div className="flex justify-between mb-4">
-                                <button 
-                                    onClick={handleGuess}
-                                    className="bg-blue-500 text-white px-4 py-2 flex-grow mr-2"
-                                >
-                                    Guess
-                                </button>
-                                <button 
-                                    onClick={revealHint}
-                                    disabled={hintsUsed >= 3}
-                                    className={`px-4 py-2 flex-grow ${hintsUsed >= 3 ? 'bg-gray-300' : 'bg-green-500 text-white'}`}
-                                >
-                                    Hint ({3 - hintsUsed} left)
-                                </button>
-                            </div>
-                            {message && (
-                                <p className="mt-4 p-2 bg-yellow-100 border border-yellow-400">{message}</p>
-                            )}
-                        </>
-                    )}
-                </div>
-            );
+        function startGame() {
+            currentMovie = movies[Math.floor(Math.random() * movies.length)];
+            document.getElementById('plot').textContent = currentMovie.plot;
+            document.getElementById('message').textContent = '';
+            document.getElementById('guess').value = '';
+            hintsUsed = 0;
         }
 
-        ReactDOM.render(<CineScramble />, document.getElementById('root'));
+        function checkGuess() {
+            const guess = document.getElementById('guess').value.toUpperCase();
+            if (guess === currentMovie.title) {
+                document.getElementById('message').textContent = 'Correct! Well done!';
+                setTimeout(startGame, 2000);
+            } else {
+                document.getElementById('message').textContent = 'Sorry, that\'s not correct. Try again!';
+            }
+        }
+
+        function getHint() {
+            if (hintsUsed >= currentMovie.title.length) {
+                document.getElementById('message').textContent = 'No more hints available!';
+                return;
+            }
+            const hintLetter = currentMovie.title[hintsUsed];
+            document.getElementById('message').textContent = `Hint: Letter ${hintsUsed + 1} is "${hintLetter}"`;
+            hintsUsed++;
+        }
+
+        startGame();
     </script>
 </body>
 </html>
