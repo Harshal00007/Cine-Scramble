@@ -26,11 +26,12 @@
         ];
 
         function shuffleArray(array) {
-            for (let i = array.length - 1; i > 0; i--) {
+            let shuffled = array.slice();
+            for (let i = shuffled.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
-                [array[i], array[j]] = [array[j], array[i]];
+                [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
             }
-            return array;
+            return shuffled;
         }
 
         function CineScramble() {
@@ -49,14 +50,15 @@
             }, []);
 
             function startNewGame() {
-                setShuffledMovies(shuffleArray([...movies]));
+                const newShuffledMovies = shuffleArray(movies);
+                setShuffledMovies(newShuffledMovies);
                 setCurrentMovieIndex(0);
                 setScore(0);
                 setHintsUsed(0);
                 setGuess('');
                 setMessage('');
                 setGameOver(false);
-                setGrid(createGrid(shuffledMovies[0].title));
+                setGrid(createGrid(newShuffledMovies[0].title));
             }
 
             React.useEffect(() => {
@@ -75,14 +77,15 @@
             function handleGuess() {
                 if (guess.toUpperCase() === shuffledMovies[currentMovieIndex].title.replace(/\s/g, '')) {
                     const pointsEarned = [10, 8, 6, 4][hintsUsed];
-                    setScore(score + pointsEarned);
-                    setMessage(`Correct! You earned ${pointsEarned} points. Your total score is ${score + pointsEarned}.`);
+                    const newScore = score + pointsEarned;
+                    setScore(newScore);
+                    setMessage(`Correct! You earned ${pointsEarned} points. Your total score is ${newScore}.`);
                     if (currentMovieIndex < shuffledMovies.length - 1) {
                         setCurrentMovieIndex(currentMovieIndex + 1);
                         setHintsUsed(0);
                         setGuess('');
                     } else {
-                        setMessage(`Congratulations! You've completed all movies. Your final score is ${score + pointsEarned}.`);
+                        setMessage(`Congratulations! You've completed all movies. Your final score is ${newScore}.`);
                         setGameOver(true);
                     }
                 } else {
@@ -93,7 +96,7 @@
             function revealHint() {
                 if (hintsUsed >= 3) return;
 
-                let newGrid = [...grid];
+                let newGrid = grid.map(row => row.slice());
                 let hiddenIndices = [];
 
                 newGrid.forEach((row, i) => {
@@ -151,7 +154,7 @@
                                     ))
                                 )}
                             </div>
-                            <p className="mb-4"><strong>Plot:</strong> {shuffledMovies[currentMovieIndex]?.plot}</p>
+                            <p className="mb-4"><strong>Plot:</strong> {shuffledMovies.length > 0 ? shuffledMovies[currentMovieIndex].plot : ''}</p>
                             <input
                                 type="text"
                                 value={guess}
