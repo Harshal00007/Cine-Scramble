@@ -5,18 +5,23 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cine Scramble</title>
     <style>
-        body { font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; }
-        button { padding: 10px; margin: 5px; }
-        input { padding: 10px; width: 100%; box-sizing: border-box; margin-bottom: 10px; }
+        body { font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; text-align: center; }
+        button { padding: 10px; margin: 5px; cursor: pointer; }
+        input { padding: 10px; width: 80%; box-sizing: border-box; margin-bottom: 10px; }
+        #grid { display: flex; flex-wrap: wrap; justify-content: center; margin-bottom: 20px; }
+        .letter { width: 30px; height: 30px; border: 1px solid #000; margin: 2px; display: flex; align-items: center; justify-content: center; font-weight: bold; }
+        #message { font-weight: bold; margin-top: 20px; }
     </style>
 </head>
 <body>
     <h1>Cine Scramble</h1>
     <div id="game">
+        <h2>Score: <span id="score">0</span></h2>
+        <div id="grid"></div>
         <p id="plot"></p>
         <input type="text" id="guess" placeholder="Enter your guess">
         <button onclick="checkGuess()">Guess</button>
-        <button onclick="getHint()">Hint</button>
+        <button onclick="getHint()">Hint (<span id="hints">3</span> left)</button>
         <p id="message"></p>
     </div>
 
@@ -25,23 +30,44 @@
             { title: "JAWS", plot: "A giant man-eating shark terrorizes a beach town." },
             { title: "ALIEN", plot: "A deadly creature stalks the crew of a spaceship." },
             { title: "ROCKY", plot: "An underdog boxer gets a shot at the heavyweight title." },
+            { title: "INCEPTION", plot: "A thief enters people's dreams to plant ideas." },
+            { title: "TITANIC", plot: "A love story unfolds during a doomed maiden voyage." },
         ];
 
         let currentMovie;
         let hintsUsed = 0;
+        let score = 0;
+        let revealedLetters;
 
         function startGame() {
             currentMovie = movies[Math.floor(Math.random() * movies.length)];
             document.getElementById('plot').textContent = currentMovie.plot;
             document.getElementById('message').textContent = '';
             document.getElementById('guess').value = '';
+            document.getElementById('hints').textContent = '3';
             hintsUsed = 0;
+            revealedLetters = new Array(currentMovie.title.length).fill(false);
+            updateGrid();
+        }
+
+        function updateGrid() {
+            const grid = document.getElementById('grid');
+            grid.innerHTML = '';
+            for (let i = 0; i < currentMovie.title.length; i++) {
+                const letter = document.createElement('div');
+                letter.className = 'letter';
+                letter.textContent = revealedLetters[i] ? currentMovie.title[i] : '';
+                grid.appendChild(letter);
+            }
         }
 
         function checkGuess() {
             const guess = document.getElementById('guess').value.toUpperCase();
             if (guess === currentMovie.title) {
-                document.getElementById('message').textContent = 'Correct! Well done!';
+                const points = 10 - (hintsUsed * 2);
+                score += points;
+                document.getElementById('score').textContent = score;
+                document.getElementById('message').textContent = `Correct! You earned ${points} points.`;
                 setTimeout(startGame, 2000);
             } else {
                 document.getElementById('message').textContent = 'Sorry, that\'s not correct. Try again!';
@@ -49,13 +75,18 @@
         }
 
         function getHint() {
-            if (hintsUsed >= currentMovie.title.length) {
+            if (hintsUsed >= 3) {
                 document.getElementById('message').textContent = 'No more hints available!';
                 return;
             }
-            const hintLetter = currentMovie.title[hintsUsed];
-            document.getElementById('message').textContent = `Hint: Letter ${hintsUsed + 1} is "${hintLetter}"`;
-            hintsUsed++;
+            let unrevealed = revealedLetters.map((r, i) => r ? -1 : i).filter(i => i !== -1);
+            if (unrevealed.length > 0) {
+                const index = unrevealed[Math.floor(Math.random() * unrevealed.length)];
+                revealedLetters[index] = true;
+                updateGrid();
+                hintsUsed++;
+                document.getElementById('hints').textContent = 3 - hintsUsed;
+            }
         }
 
         startGame();
