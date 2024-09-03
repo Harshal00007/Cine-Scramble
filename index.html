@@ -3,10 +3,61 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cine Scramble Test</title>
+    <title>Cine Scramble</title>
+    <script src="https://unpkg.com/react@17/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@17/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
 </head>
 <body>
-    <h1>Cine Scramble</h1>
-    <p>If you can see this, the deployment is working!</p>
+    <div id="root"></div>
+    <script type="text/babel">
+        const movies = [
+            { title: "JAWS", plot: "A giant man-eating shark terrorizes a beach town." },
+            { title: "ALIEN", plot: "A deadly creature stalks the crew of a spaceship." },
+            { title: "ROCKY", plot: "An underdog boxer gets a shot at the heavyweight title." },
+            { title: "INCEPTION", plot: "A thief enters people's dreams to plant ideas." },
+            { title: "TITANIC", plot: "A love story unfolds during a doomed maiden voyage." },
+        ];
+
+        function CineScramble() {
+            const [movie, setMovie] = React.useState(movies[0]);
+            const [guess, setGuess] = React.useState('');
+            const [message, setMessage] = React.useState('');
+
+            function handleGuess() {
+                if (guess.toUpperCase() === movie.title) {
+                    setMessage('Correct! Well done!');
+                } else {
+                    setMessage('Sorry, that\'s not correct. Try again!');
+                }
+            }
+
+            return (
+                <div className="p-4 max-w-md mx-auto">
+                    <h1 className="text-2xl font-bold mb-4">Cine Scramble</h1>
+                    <p className="mb-4"><strong>Plot:</strong> {movie.plot}</p>
+                    <input
+                        type="text"
+                        value={guess}
+                        onChange={(e) => setGuess(e.target.value)}
+                        placeholder="Enter your guess"
+                        className="border p-2 mb-2 w-full"
+                    />
+                    <button 
+                        onClick={handleGuess}
+                        className="bg-blue-500 text-white px-4 py-2 w-full"
+                    >
+                        Guess
+                    </button>
+                    {message && (
+                        <p className="mt-4 p-2 bg-yellow-100 border border-yellow-400">{message}</p>
+                    )}
+                </div>
+            );
+        }
+
+        ReactDOM.render(<CineScramble />, document.getElementById('root'));
+    </script>
 </body>
 </html>
