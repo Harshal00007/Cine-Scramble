@@ -8,6 +8,29 @@
     <script src="https://unpkg.com/react-dom@17/umd/react-dom.production.min.js" crossorigin></script>
     <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/js/all.min.js"></script>
+    <style>
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        .bounce {
+            animation: bounce 0.5s;
+        }
+        .rotate-center {
+            transition: transform 0.3s ease-in-out;
+        }
+        .rotate-center:hover {
+            transform: rotate(360deg);
+        }
+    </style>
 </head>
 <body>
     <div id="root"></div>
@@ -25,15 +48,6 @@
             { title: "GLADIATOR", plot: "A former Roman General seeks revenge against the corrupt emperor who murdered his family." }
         ];
 
-        function shuffleArray(array) {
-            let shuffled = array.slice();
-            for (let i = shuffled.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-            }
-            return shuffled;
-        }
-
         function CineScramble() {
             const [currentMovie, setCurrentMovie] = React.useState(null);
             const [guess, setGuess] = React.useState('');
@@ -44,6 +58,7 @@
             const [showHow, setShowHow] = React.useState(false);
             const [gameOver, setGameOver] = React.useState(false);
             const [showAnswer, setShowAnswer] = React.useState(false);
+            const [bounce, setBounce] = React.useState(false);
 
             React.useEffect(() => {
                 startNewGame();
@@ -85,6 +100,8 @@
                     setScore(newScore);
                     setMessage(`Correct! You earned ${pointsEarned} points. Your total score is ${newScore}.`);
                     setShowAnswer(true);
+                    setBounce(true);
+                    setTimeout(() => setBounce(false), 500);
                 } else {
                     setMessage(`Sorry, that's not correct. The correct title was "${currentMovie.title}". Your final score is ${score}.`);
                     setGameOver(true);
@@ -116,15 +133,17 @@
 
             return (
                 <div className="p-4 max-w-md mx-auto bg-gray-100 rounded-lg shadow-lg">
-                    <h1 className="text-3xl font-bold mb-4 text-center text-blue-600">Cine Scramble</h1>
+                    <h1 className="text-3xl font-bold mb-4 text-center text-blue-600">
+                        Cine Scramble <i className="fas fa-film rotate-center"></i>
+                    </h1>
                     <button 
                         onClick={() => setShowHow(!showHow)}
                         className="bg-blue-500 text-white px-4 py-2 rounded mb-4 w-full hover:bg-blue-600 transition duration-300"
                     >
-                        {showHow ? "Back to Game" : "How to Play"}
+                        {showHow ? "Back to Game" : "How to Play"} <i className={`fas ${showHow ? 'fa-gamepad' : 'fa-question-circle'}`}></i>
                     </button>
                     {showHow ? (
-                        <div className="mb-4 bg-white p-4 rounded">
+                        <div className="mb-4 bg-white p-4 rounded fade-in">
                             <h2 className="text-xl font-bold mb-2">How to Play</h2>
                             <ul className="list-disc pl-5">
                                 <li>Guess the movie title based on the plot and visible letters.</li>
@@ -141,12 +160,12 @@
                             </ul>
                         </div>
                     ) : (
-                        <div>
-                            <p className="mb-4 text-lg"><strong>Score:</strong> {score}</p>
+                        <div className="fade-in">
+                            <p className="mb-4 text-lg"><strong>Score:</strong> {score} <i className={`fas fa-star text-yellow-400 ${bounce ? 'bounce' : ''}`}></i></p>
                             <div className={`grid gap-2 mb-4 grid-cols-${grid.length} bg-white p-4 rounded`}>
                                 {showAnswer
                                     ? currentMovie.title.replace(/\s/g, '').split('').map((char, index) => (
-                                        <div key={index} className="w-12 h-12 border-2 border-green-300 flex items-center justify-center font-bold text-xl bg-green-50">
+                                        <div key={index} className="w-12 h-12 border-2 border-green-300 flex items-center justify-center font-bold text-xl bg-green-50 fade-in">
                                             {char}
                                         </div>
                                     ))
@@ -158,7 +177,7 @@
                                         ))
                                     )}
                             </div>
-                            <p className="mb-4"><strong>Plot:</strong> {currentMovie ? currentMovie.plot : ''}</p>
+                            <p className="mb-4"><strong>Plot:</strong> {currentMovie ? currentMovie.plot : ''} <i className="fas fa-book-open text-gray-500"></i></p>
                             <input
                                 type="text"
                                 value={guess}
@@ -173,25 +192,25 @@
                                     className="bg-green-500 text-white px-4 py-2 rounded flex-grow mr-2 hover:bg-green-600 transition duration-300"
                                     disabled={gameOver || showAnswer}
                                 >
-                                    Guess
+                                    Guess <i className="fas fa-check"></i>
                                 </button>
                                 <button 
                                     onClick={revealHint}
                                     disabled={hintsUsed >= 3 || gameOver || showAnswer}
                                     className={`px-4 py-2 rounded flex-grow ${hintsUsed >= 3 || gameOver || showAnswer ? 'bg-gray-300' : 'bg-yellow-500 text-white hover:bg-yellow-600 transition duration-300'}`}
                                 >
-                                    Hint ({3 - hintsUsed} left)
+                                    Hint ({3 - hintsUsed} left) <i className="fas fa-lightbulb"></i>
                                 </button>
                             </div>
                             {message && (
-                                <p className="mt-4 p-2 bg-blue-100 border border-blue-400 rounded text-center">{message}</p>
+                                <p className="mt-4 p-2 bg-blue-100 border border-blue-400 rounded text-center fade-in">{message}</p>
                             )}
                             {showAnswer && !gameOver && (
                                 <button 
                                     onClick={nextMovie}
                                     className="bg-purple-500 text-white px-4 py-2 mt-4 w-full rounded hover:bg-purple-600 transition duration-300"
                                 >
-                                    Next Movie
+                                    Next Movie <i className="fas fa-forward"></i>
                                 </button>
                             )}
                             {gameOver && (
@@ -199,7 +218,7 @@
                                     onClick={startNewGame}
                                     className="bg-red-500 text-white px-4 py-2 mt-4 w-full rounded hover:bg-red-600 transition duration-300"
                                 >
-                                    Play Again
+                                    Play Again <i className="fas fa-redo"></i>
                                 </button>
                             )}
                         </div>
