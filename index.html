@@ -181,18 +181,18 @@
             }
 
             function handleGuess() {
-                if (guess.toUpperCase() === currentMovie.title.replace(/\s/g, '')) {
-                    const pointsEarned = [10, 8, 6, 4][hintsUsed];
-                    const newScore = score + pointsEarned;
-                    setScore(newScore);
-                    setMessage(`Correct! You earned ${pointsEarned} points. Your total score is ${newScore}.`);
-                    setShowAnswer(true);
-                    setBounce(true);
-                    setTimeout(() => setBounce(false), 500);
-                } else {
-                    setMessage(`Sorry, that's not correct. The correct title was "${currentMovie.title}". Your final score is ${score}.`);
-                    setGameOver(true);
-                    setShowAnswer(true);
+               if (guess.toUpperCase() === currentMovie.title.replace(/\s/g, '').toUpperCase()) {
+        const pointsEarned = [10, 8, 6, 4][hintsUsed];
+        const newScore = score + pointsEarned;
+        setScore(newScore);
+        setMessage(`Correct! You earned ${pointsEarned} points. Your total score is ${newScore}.`);
+        setShowAnswer(true);
+        setBounce(true);
+        setTimeout(() => setBounce(false), 500);
+    } else {
+        setMessage(`Sorry, that's not correct. The correct title was "${currentMovie.title}". Your final score is ${score}.`);
+        setGameOver(true);
+        setShowAnswer(true);
                 }
             }
 
