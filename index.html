@@ -118,7 +118,7 @@
                             </ul>
                         </div>
                     ) : (
-                        <>
+                        <div>
                             <p className="mb-4"><strong>Score:</strong> {score}</p>
                             <div className="grid grid-cols-4 gap-2 mb-4">
                                 {grid.map((row, i) => 
@@ -165,7 +165,7 @@
                                     Play Again
                                 </button>
                             )}
-                        </>
+                        </div>
                     )}
                 </div>
             );
