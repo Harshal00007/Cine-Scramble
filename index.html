@@ -35,8 +35,7 @@
         }
 
         function CineScramble() {
-            const [currentMovieIndex, setCurrentMovieIndex] = React.useState(0);
-            const [shuffledMovies, setShuffledMovies] = React.useState([]);
+            const [currentMovie, setCurrentMovie] = React.useState(null);
             const [guess, setGuess] = React.useState('');
             const [message, setMessage] = React.useState('');
             const [score, setScore] = React.useState(0);
@@ -44,28 +43,33 @@
             const [hintsUsed, setHintsUsed] = React.useState(0);
             const [showHow, setShowHow] = React.useState(false);
             const [gameOver, setGameOver] = React.useState(false);
+            const [showAnswer, setShowAnswer] = React.useState(false);
 
             React.useEffect(() => {
                 startNewGame();
             }, []);
 
             function startNewGame() {
-                const newShuffledMovies = shuffleArray(movies);
-                setShuffledMovies(newShuffledMovies);
-                setCurrentMovieIndex(0);
+                const newMovie = movies[Math.floor(Math.random() * movies.length)];
+                setCurrentMovie(newMovie);
                 setScore(0);
                 setHintsUsed(0);
                 setGuess('');
                 setMessage('');
                 setGameOver(false);
-                setGrid(createGrid(newShuffledMovies[0].title));
+                setShowAnswer(false);
+                setGrid(createGrid(newMovie.title));
             }
 
-            React.useEffect(() => {
-                if (shuffledMovies.length > 0) {
-                    setGrid(createGrid(shuffledMovies[currentMovieIndex].title));
-                }
-            }, [currentMovieIndex, shuffledMovies]);
+            function nextMovie() {
+                const newMovie = movies[Math.floor(Math.random() * movies.length)];
+                setCurrentMovie(newMovie);
+                setHintsUsed(0);
+                setGuess('');
+                setMessage('');
+                setShowAnswer(false);
+                setGrid(createGrid(newMovie.title));
+            }
 
             function createGrid(title) {
                 const cleanTitle = title.replace(/\s/g, '');
@@ -75,21 +79,16 @@
             }
 
             function handleGuess() {
-                if (guess.toUpperCase() === shuffledMovies[currentMovieIndex].title.replace(/\s/g, '')) {
+                if (guess.toUpperCase() === currentMovie.title.replace(/\s/g, '')) {
                     const pointsEarned = [10, 8, 6, 4][hintsUsed];
                     const newScore = score + pointsEarned;
                     setScore(newScore);
                     setMessage(`Correct! You earned ${pointsEarned} points. Your total score is ${newScore}.`);
-                    if (currentMovieIndex < shuffledMovies.length - 1) {
-                        setCurrentMovieIndex(currentMovieIndex + 1);
-                        setHintsUsed(0);
-                        setGuess('');
-                    } else {
-                        setMessage(`Congratulations! You've completed all movies. Your final score is ${newScore}.`);
-                        setGameOver(true);
-                    }
+                    setShowAnswer(true);
                 } else {
-                    setMessage('Sorry, that\'s not correct. Try again!');
+                    setMessage(`Sorry, that's not correct. The correct title was "${currentMovie.title}". Your final score is ${score}.`);
+                    setGameOver(true);
+                    setShowAnswer(true);
                 }
             }
 
@@ -138,43 +137,48 @@
                                         <li>With 3 hints: 4 points</li>
                                     </ul>
                                 </li>
-                                <li>Try to get the highest score possible across all movies!</li>
+                                <li>Try to get the highest score possible!</li>
                             </ul>
                         </div>
                     ) : (
                         <div>
                             <p className="mb-4 text-lg"><strong>Score:</strong> {score}</p>
-                            <p className="mb-2 text-sm"><strong>Movie:</strong> {currentMovieIndex + 1} / {shuffledMovies.length}</p>
                             <div className={`grid gap-2 mb-4 grid-cols-${grid.length} bg-white p-4 rounded`}>
-                                {grid.map((row, i) => 
-                                    row.map((cell, j) => (
-                                        <div key={`${i}-${j}`} className="w-12 h-12 border-2 border-blue-300 flex items-center justify-center font-bold text-xl bg-blue-50">
-                                            {cell === cell.toUpperCase() ? cell : ''}
+                                {showAnswer
+                                    ? currentMovie.title.replace(/\s/g, '').split('').map((char, index) => (
+                                        <div key={index} className="w-12 h-12 border-2 border-green-300 flex items-center justify-center font-bold text-xl bg-green-50">
+                                            {char}
                                         </div>
                                     ))
-                                )}
+                                    : grid.map((row, i) => 
+                                        row.map((cell, j) => (
+                                            <div key={`${i}-${j}`} className="w-12 h-12 border-2 border-blue-300 flex items-center justify-center font-bold text-xl bg-blue-50">
+                                                {cell === cell.toUpperCase() ? cell : ''}
+                                            </div>
+                                        ))
+                                    )}
                             </div>
-                            <p className="mb-4"><strong>Plot:</strong> {shuffledMovies.length > 0 ? shuffledMovies[currentMovieIndex].plot : ''}</p>
+                            <p className="mb-4"><strong>Plot:</strong> {currentMovie ? currentMovie.plot : ''}</p>
                             <input
                                 type="text"
                                 value={guess}
                                 onChange={(e) => setGuess(e.target.value)}
                                 placeholder="Enter your guess"
                                 className="border-2 border-blue-300 p-2 mb-2 w-full rounded"
-                                disabled={gameOver}
+                                disabled={gameOver || showAnswer}
                             />
                             <div className="flex justify-between mb-4">
                                 <button 
                                     onClick={handleGuess}
                                     className="bg-green-500 text-white px-4 py-2 rounded flex-grow mr-2 hover:bg-green-600 transition duration-300"
-                                    disabled={gameOver}
+                                    disabled={gameOver || showAnswer}
                                 >
                                     Guess
                                 </button>
                                 <button 
                                     onClick={revealHint}
-                                    disabled={hintsUsed >= 3 || gameOver}
-                                    className={`px-4 py-2 rounded flex-grow ${hintsUsed >= 3 || gameOver ? 'bg-gray-300' : 'bg-yellow-500 text-white hover:bg-yellow-600 transition duration-300'}`}
+                                    disabled={hintsUsed >= 3 || gameOver || showAnswer}
+                                    className={`px-4 py-2 rounded flex-grow ${hintsUsed >= 3 || gameOver || showAnswer ? 'bg-gray-300' : 'bg-yellow-500 text-white hover:bg-yellow-600 transition duration-300'}`}
                                 >
                                     Hint ({3 - hintsUsed} left)
                                 </button>
@@ -182,10 +186,18 @@
                             {message && (
                                 <p className="mt-4 p-2 bg-blue-100 border border-blue-400 rounded text-center">{message}</p>
                             )}
+                            {showAnswer && !gameOver && (
+                                <button 
+                                    onClick={nextMovie}
+                                    className="bg-purple-500 text-white px-4 py-2 mt-4 w-full rounded hover:bg-purple-600 transition duration-300"
+                                >
+                                    Next Movie
+                                </button>
+                            )}
                             {gameOver && (
                                 <button 
                                     onClick={startNewGame}
-                                    className="bg-purple-500 text-white px-4 py-2 mt-4 w-full rounded hover:bg-purple-600 transition duration-300"
+                                    className="bg-red-500 text-white px-4 py-2 mt-4 w-full rounded hover:bg-red-600 transition duration-300"
                                 >
                                     Play Again
                                 </button>
