@@ -233,96 +233,98 @@
     }
 
 
-            return (
-                <div className="p-4 max-w-md mx-auto bg-gray-100 rounded-lg shadow-lg">
-                    <h1 className="text-3xl font-bold mb-4 text-center text-blue-600">
-                        Cine Scramble <i className="fas fa-film rotate-center"></i>
-                    </h1>
-                    <button 
-                        onClick={() => setShowHow(!showHow)}
-                        className="bg-blue-500 text-white px-4 py-2 rounded mb-4 w-full hover:bg-blue-600 transition duration-300"
-                    >
-                        {showHow ? "Back to Game" : "How to Play"} <i className={`fas ${showHow ? 'fa-gamepad' : 'fa-question-circle'}`}></i>
-                    </button>
-                    {showHow ? (
-                        <div className="mb-4 bg-white p-4 rounded fade-in">
-                            <h2 className="text-xl font-bold mb-2">How to Play</h2>
-                            <ul className="list-disc pl-5">
-                                <li>Guess the movie title based on the plot and visible letters.</li>
-                                <li>You have 3 hints available. Each hint reveals a random letter.</li>
-                                <li>Scoring:
-                                    <ul className="list-circle pl-5">
-                                        <li>Correct guess without hints: 10 points</li>
-                                        <li>With 1 hint: 8 points</li>
-                                        <li>With 2 hints: 6 points</li>
-                                        <li>With 3 hints: 4 points</li>
-                                    </ul>
-                                </li>
-                                <li>Try to get the highest score possible!</li>
-                            </ul>
-                        </div>
-                    ) : (
-                       <div className="flex flex-wrap justify-center mb-4 bg-white p-4 rounded">
-                {showAnswer
-                    ? currentMovie.title.replace(/\s/g, '').split('').map((char, index) => (
-                        <div key={index} className="w-10 h-10 m-1 border-2 border-green-300 flex items-center justify-center font-bold text-xl bg-green-50 fade-in">
-                            {char}
-                        </div>
-                    ))
-                    : grid.map((cell, index) => (
-                        <div key={index} className="w-10 h-10 m-1 border-2 border-blue-300 flex items-center justify-center font-bold text-xl bg-blue-50">
-                            {cell === cell.toUpperCase() ? cell : ''}
-                        </div>
-                    ))}
+return (
+    <div className="p-4 max-w-md mx-auto bg-gray-100 rounded-lg shadow-lg">
+        <h1 className="text-3xl font-bold mb-4 text-center text-blue-600">
+            Cine Scramble <i className="fas fa-film rotate-center"></i>
+        </h1>
+        <button 
+            onClick={() => setShowHow(!showHow)}
+            className="bg-blue-500 text-white px-4 py-2 rounded mb-4 w-full hover:bg-blue-600 transition duration-300"
+        >
+            {showHow ? "Back to Game" : "How to Play"} <i className={`fas ${showHow ? 'fa-gamepad' : 'fa-question-circle'}`}></i>
+        </button>
+        {showHow ? (
+            <div className="mb-4 bg-white p-4 rounded fade-in">
+                <h2 className="text-xl font-bold mb-2">How to Play</h2>
+                <ul className="list-disc pl-5">
+                    <li>Guess the movie title based on the plot and visible letters.</li>
+                    <li>You have 3 hints available. Each hint reveals a random letter.</li>
+                    <li>Scoring:
+                        <ul className="list-circle pl-5">
+                            <li>Correct guess without hints: 10 points</li>
+                            <li>With 1 hint: 8 points</li>
+                            <li>With 2 hints: 6 points</li>
+                            <li>With 3 hints: 4 points</li>
+                        </ul>
+                    </li>
+                    <li>Try to get the highest score possible!</li>
+                </ul>
             </div>
-                            <p className="mb-4"><strong>Plot:</strong> {currentMovie ? currentMovie.plot : ''} <i className="fas fa-book-open text-gray-500"></i></p>
-                            <input
-                                type="text"
-                                value={guess}
-                                onChange={(e) => setGuess(e.target.value)}
-                                placeholder="Enter your guess"
-                                className="border-2 border-blue-300 p-2 mb-2 w-full rounded"
-                                disabled={gameOver || showAnswer}
-                            />
-                            <div className="flex justify-between mb-4">
-                                <button 
-                                    onClick={handleGuess}
-                                    className="bg-green-500 text-white px-4 py-2 rounded flex-grow mr-2 hover:bg-green-600 transition duration-300"
-                                    disabled={gameOver || showAnswer}
-                                >
-                                    Guess <i className="fas fa-check"></i>
-                                </button>
-                                <button 
-                                    onClick={revealHint}
-                                    disabled={hintsUsed >= 3 || gameOver || showAnswer}
-                                    className={`px-4 py-2 rounded flex-grow ${hintsUsed >= 3 || gameOver || showAnswer ? 'bg-gray-300' : 'bg-yellow-500 text-white hover:bg-yellow-600 transition duration-300'}`}
-                                >
-                                    Hint ({3 - hintsUsed} left) <i className="fas fa-lightbulb"></i>
-                                </button>
+        ) : (
+            <div className="fade-in">
+                <p className="mb-4 text-lg"><strong>Score:</strong> {score} <i className={`fas fa-star text-yellow-400 ${bounce ? 'bounce' : ''}`}></i></p>
+                <div className="flex flex-wrap justify-center mb-4 bg-white p-4 rounded">
+                    {showAnswer
+                        ? currentMovie.title.replace(/\s/g, '').split('').map((char, index) => (
+                            <div key={index} className="w-10 h-10 m-1 border-2 border-green-300 flex items-center justify-center font-bold text-xl bg-green-50 fade-in">
+                                {char}
                             </div>
-                            {message && (
-                                <p className="mt-4 p-2 bg-blue-100 border border-blue-400 rounded text-center fade-in">{message}</p>
-                            )}
-                            {showAnswer && !gameOver && (
-                                <button 
-                                    onClick={nextMovie}
-                                    className="bg-purple-500 text-white px-4 py-2 mt-4 w-full rounded hover:bg-purple-600 transition duration-300"
-                                >
-                                    Next Movie <i className="fas fa-forward"></i>
-                                </button>
-                            )}
-                            {gameOver && (
-                                <button 
-                                    onClick={startNewGame}
-                                    className="bg-red-500 text-white px-4 py-2 mt-4 w-full rounded hover:bg-red-600 transition duration-300"
-                                >
-                                    Play Again <i className="fas fa-redo"></i>
-                                </button>
-                            )}
-                        </div>
-                    )}
+                        ))
+                        : grid.map((cell, index) => (
+                            <div key={index} className="w-10 h-10 m-1 border-2 border-blue-300 flex items-center justify-center font-bold text-xl bg-blue-50">
+                                {cell === cell.toUpperCase() ? cell : ''}
+                            </div>
+                        ))}
                 </div>
-            );
+                <p className="mb-4"><strong>Plot:</strong> {currentMovie ? currentMovie.plot : ''} <i className="fas fa-book-open text-gray-500"></i></p>
+                <input
+                    type="text"
+                    value={guess}
+                    onChange={(e) => setGuess(e.target.value)}
+                    placeholder="Enter your guess"
+                    className="border-2 border-blue-300 p-2 mb-2 w-full rounded"
+                    disabled={gameOver || showAnswer}
+                />
+                <div className="flex justify-between mb-4">
+                    <button 
+                        onClick={handleGuess}
+                        className="bg-green-500 text-white px-4 py-2 rounded flex-grow mr-2 hover:bg-green-600 transition duration-300"
+                        disabled={gameOver || showAnswer}
+                    >
+                        Guess <i className="fas fa-check"></i>
+                    </button>
+                    <button 
+                        onClick={revealHint}
+                        disabled={hintsUsed >= 3 || gameOver || showAnswer}
+                        className={`px-4 py-2 rounded flex-grow ${hintsUsed >= 3 || gameOver || showAnswer ? 'bg-gray-300' : 'bg-yellow-500 text-white hover:bg-yellow-600 transition duration-300'}`}
+                    >
+                        Hint ({3 - hintsUsed} left) <i className="fas fa-lightbulb"></i>
+                    </button>
+                </div>
+                {message && (
+                    <p className="mt-4 p-2 bg-blue-100 border border-blue-400 rounded text-center fade-in">{message}</p>
+                )}
+                {showAnswer && !gameOver && (
+                    <button 
+                        onClick={nextMovie}
+                        className="bg-purple-500 text-white px-4 py-2 mt-4 w-full rounded hover:bg-purple-600 transition duration-300"
+                    >
+                        Next Movie <i className="fas fa-forward"></i>
+                    </button>
+                )}
+                {gameOver && (
+                    <button 
+                        onClick={startNewGame}
+                        className="bg-red-500 text-white px-4 py-2 mt-4 w-full rounded hover:bg-red-600 transition duration-300"
+                    >
+                        Play Again <i className="fas fa-redo"></i>
+                    </button>
+                )}
+            </div>
+        )}
+    </div>
+);
         }
 
         ReactDOM.render(<CineScramble />, document.getElementById('root'));
