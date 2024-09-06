@@ -162,7 +162,7 @@
     const [gameOver, setGameOver] = React.useState(false);
     const [showAnswer, setShowAnswer] = React.useState(false);
     const [timedMode, setTimedMode] = React.useState(false);
-    const [timeLeft, setTimeLeft] = React.useState(60);
+    const [timeLeft, setTimeLeft] = React.useState(30);  // Changed to 30 seconds
 
     React.useEffect(() => {
         startNewGame();
@@ -195,7 +195,7 @@
         setGameOver(false);
         setShowAnswer(false);
         setGrid(createGrid(newMovie.title));
-        setTimeLeft(60);
+        setTimeLeft(30);  // Changed to 30 seconds
     }
 
     function nextMovie() {
@@ -206,7 +206,7 @@
         setMessage('');
         setShowAnswer(false);
         setGrid(createGrid(newMovie.title));
-        setTimeLeft(60);
+        setTimeLeft(30); 
     }
 
     function handleGuess() {
@@ -291,7 +291,7 @@
                             </ul>
                         </li>
                         <li>Try to get the highest score possible!</li>
-                        <li>In timed mode, you have 60 seconds to guess each movie.</li>
+                        <li>Are you a Pro? In Timed Mode, you have 30 seconds to guess each movie.</li>
                     </ul>
                 </div>
             ) : (
