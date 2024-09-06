@@ -161,10 +161,22 @@
     const [showHow, setShowHow] = React.useState(false);
     const [gameOver, setGameOver] = React.useState(false);
     const [showAnswer, setShowAnswer] = React.useState(false);
+    const [timedMode, setTimedMode] = React.useState(false);
+    const [timeLeft, setTimeLeft] = React.useState(60);
 
     React.useEffect(() => {
         startNewGame();
     }, []);
+
+    React.useEffect(() => {
+        let timer;
+        if (timedMode && timeLeft > 0 && !gameOver && !showAnswer) {
+            timer = setTimeout(() => setTimeLeft(timeLeft - 1), 1000);
+        } else if (timedMode && timeLeft === 0 && !gameOver) {
+            handleTimeout();
+        }
+        return () => clearTimeout(timer);
+    }, [timedMode, timeLeft, gameOver, showAnswer]);
 
     function createGrid(title) {
         return title.replace(/\s/g, '').split('').map(char => ({
@@ -183,6 +195,7 @@
         setGameOver(false);
         setShowAnswer(false);
         setGrid(createGrid(newMovie.title));
+        setTimeLeft(60);
     }
 
     function nextMovie() {
@@ -193,6 +206,7 @@
         setMessage('');
         setShowAnswer(false);
         setGrid(createGrid(newMovie.title));
+        setTimeLeft(60);
     }
 
     function handleGuess() {
@@ -213,6 +227,12 @@
         }
     }
 
+    function handleTimeout() {
+        setMessage(`Time's up! The correct title was "${currentMovie.title}". Your final score is ${score}.`);
+        setGameOver(true);
+        setShowAnswer(true);
+    }
+
     function revealHint() {
         if (hintsUsed >= 3) return;
 
@@ -230,19 +250,31 @@
         }
     }
 
+    function toggleTimedMode() {
+        setTimedMode(!timedMode);
+        startNewGame();
+    }
 
  return (
-        <div className="max-w-md mx-auto bg-gray-100 rounded-lg shadow-lg p-4">
+         <div className="max-w-md mx-auto bg-gray-100 rounded-lg shadow-lg p-4">
             <h1 className="text-3xl font-bold mb-4 text-center text-blue-600">
                 Cine Scramble <i className="fas fa-film"></i>
             </h1>
             
-            <button 
-                onClick={() => setShowHow(!showHow)}
-                className="w-full bg-blue-500 text-white px-4 py-2 rounded mb-4 hover:bg-blue-600 transition duration-300"
-            >
-                {showHow ? "Back to Game" : "How to Play"} <i className={`fas ${showHow ? 'fa-gamepad' : 'fa-question-circle'}`}></i>
-            </button>
+            <div className="flex justify-between mb-4">
+                <button 
+                    onClick={() => setShowHow(!showHow)}
+                    className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition duration-300"
+                >
+                    {showHow ? "Back to Game" : "How to Play"} <i className={`fas ${showHow ? 'fa-gamepad' : 'fa-question-circle'}`}></i>
+                </button>
+                <button 
+                    onClick={toggleTimedMode}
+                    className={`px-4 py-2 rounded transition duration-300 ${timedMode ? 'bg-red-500 hover:bg-red-600' : 'bg-green-500 hover:bg-green-600'} text-white`}
+                >
+                    {timedMode ? "Disable Timer" : "Enable Timer"} <i className="fas fa-clock"></i>
+                </button>
+            </div>
 
             {showHow ? (
                 <div className="bg-white p-4 rounded shadow-md mb-4">
@@ -259,27 +291,27 @@
                             </ul>
                         </li>
                         <li>Try to get the highest score possible!</li>
+                        <li>In timed mode, you have 60 seconds to guess each movie.</li>
                     </ul>
                 </div>
             ) : (
                 <div>
                     <div className="flex items-center justify-between bg-blue-100 p-3 rounded-lg shadow mb-4">
-                        <span className="text-lg font-semibold">Score:</span>
-                        <span className="text-2xl font-bold">{score} <i className="fas fa-star text-yellow-400"></i></span>
+                        <span className="text-lg font-semibold">Score: {score} <i className="fas fa-star text-yellow-400"></i></span>
+                        {timedMode && <span className="text-lg font-semibold">Time: {timeLeft}s <i className="fas fa-hourglass-half"></i></span>}
                     </div>
 
                     <div className="flex flex-wrap justify-center gap-2 mb-4 bg-white p-4 rounded">
-                {(showAnswer ? currentMovie.title.replace(/\s/g, '').split('') : grid).map((cell, index) => (
-                    <div 
-                        key={index} 
-                        className={`w-10 h-10 border-2 flex items-center justify-center font-bold text-xl rounded
-                                    ${showAnswer ? 'border-green-300 bg-green-50' : 'border-blue-300 bg-blue-50'}`}
-                    >
-                        {showAnswer ? cell : (cell.revealed ? cell.char.toUpperCase() : '')}
+                        {(showAnswer ? currentMovie.title.replace(/\s/g, '').split('') : grid).map((cell, index) => (
+                            <div 
+                                key={index} 
+                                className={`w-10 h-10 border-2 flex items-center justify-center font-bold text-xl rounded
+                                            ${showAnswer ? 'border-green-300 bg-green-50' : 'border-blue-300 bg-blue-50'}`}
+                            >
+                                {showAnswer ? cell : (cell.revealed ? cell.char.toUpperCase() : '')}
+                            </div>
+                        ))}
                     </div>
-                ))}
-            </div>
-
 
                     <p className="mb-4 text-gray-700 bg-white p-3 rounded shadow">
                         <strong>Plot:</strong> {currentMovie ? currentMovie.plot : ''}
